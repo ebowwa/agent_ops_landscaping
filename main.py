@@ -1,48 +1,24 @@
-import logging
-import asyncio
-from openai import OpenAI
-import agentops
-from dotenv import load_dotenv
-import os
-from typing import Any
+import json
+from workflow import execute_workflow
 
-# Load environment variables
-load_dotenv()
-AGENTOPS_API_KEY: str = os.environ['AGENTOPS_API_KEY']
-MINDSDB_API_KEY: str = os.environ['MINDSDB_API_KEY']
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-
-# Main function
-async def main() -> None:
-    # Initialize AgentOps client
-    agentops_client = agentops.init(AGENTOPS_API_KEY)
-
-    # Create OpenAI client
-    async with OpenAI(
-        api_key=MINDSDB_API_KEY,
-        base_url="https://llm.mdb.ai"
-    ) as client:
-        # Get completion from OpenAI
-        await get_completion(client, agentops_client)
-
-# Get completion from OpenAI
-async def get_completion(client: OpenAI, agentops_client: Any) -> None:
+def main(workflow_file, compact_sequentially=True, one_shot=False):
     try:
-        # Create completion
-        response = await client.completions.create(
-            model="gemini-1.5-pro",
-            prompt="Hello, how are you today?",
-            stream=False
-        )
-
-        # Log the completion
-        logging.info(response.choices[0].text)
+        # Load the workflow from the JSON file
+        with open(workflow_file, 'r') as f:
+            workflow = json.load(f)
+        
+        # Execute the workflow
+        workflow_responses = execute_workflow(workflow, compact_sequentially, one_shot)
+        
+        # Save all the workflow responses to a JSON file
+        with open("workflow_responses.json", "w") as f:
+            json.dump(workflow_responses, f, indent=2)
+    
     except Exception as e:
-        # Log the error
-        logging.error(f"Error: {e}")
+        # Handle any exceptions that occur in the main function
+        print(f"Error in main: {e}")
+        raise
 
-# Run the main function
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Execute the workflow with sequential compaction and default response
+    main("workflow.json", compact_sequentially=True, one_shot=False)
