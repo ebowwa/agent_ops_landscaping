@@ -1,0 +1,11 @@
+[
+  {
+    "prompt": "The company name is {company_name}. The services provided by this company are: {services}. The service coverage for the {service} service is: {service_coverage[service]}"
+  },
+  {
+    "prompt": "The company {company_name} provides the following services: {services}. The service coverage for the {service} service is: {service_coverage[service]}"
+  },
+  {
+    "prompt": "The company {company_name} offers the following services: {services}. The neighborhoods covered by the {service} service are: {service_coverage[service]}"
+  }
+]

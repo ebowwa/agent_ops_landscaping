@@ -1,6 +1,5 @@
-# data_handler.py
+# create_output_csv.py
 import pandas as pd
-import numpy as np
 
 def load_data():
     # Load Bay Area data
@@ -27,3 +26,21 @@ def load_data():
         output_data['service_coverage'][service] = service_coverage
 
     return output_data
+
+def create_output_csv():
+    output_data = load_data()
+
+    # Create a list of tuples with (service, city) pairs
+    service_city_pairs = [(service, city) for service in output_data['services'] for city in output_data['service_coverage'][service]]
+
+    # Create a DataFrame from the list of tuples
+    output_df = pd.DataFrame(service_city_pairs, columns=['Service', 'City'])
+
+    # Add a new column with the city and neighborhoods
+    output_df['City & Neighborhoods'] = output_df.apply(lambda row: f"{row['City']}: {', '.join(output_data['service_coverage'][row['Service']][row['City']])}", axis=1)
+
+    # Save the DataFrame to a CSV file
+    output_df.to_csv('output/output.csv', index=False)
+
+if __name__ == "__main__":
+    create_output_csv()
